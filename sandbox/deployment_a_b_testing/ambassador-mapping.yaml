@@ -1,0 +1,9 @@
+apiVersion: getambassador.io/v2
+kind:  Mapping
+metadata:
+  name:  deployment-a-b-testing
+spec:
+  prefix: "/v2/.*/predict"
+  rewrite: ""
+  prefix_regex: true
+  service: envoy-proxy-a-b-testing.sandbox:10000

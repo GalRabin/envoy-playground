@@ -1,0 +1,26 @@
+node:
+  cluster: cluster-1
+  id: envoy-instance-1
+
+dynamic_resources:
+  lds_config:
+    path: ./lds.yaml
+  cds_config:
+    path: ./cds.yaml
+
+admin:
+  address:
+    socket_address:
+      address: 127.0.0.1
+      port_value: 9901
+  access_log:
+  - name: envoy.access_loggers.file
+    typed_config:
+      "@type": type.googleapis.com/envoy.extensions.access_loggers.stream.v3.StdoutAccessLog
+
+
+# cd ./dynamic_configuration
+# mv lds.yaml tmp; mv tmp lds.yaml
+# mv rds.yaml tmp; mv tmp rds.yaml
+# docker run -d -p 5050:80 kennethreitz/httpbin
+# mv cds.yaml tmp; mv tmp cds.yaml

@@ -1,0 +1,104 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: envoy-config
+  namespace: sandbox
+data:
+  envoy.yaml: |-
+    node:
+      cluster: cluster-1
+      id: envoy-instance-1
+
+    dynamic_resources:
+      lds_config:
+        path: /etc/envoy/lds.yaml
+      cds_config:
+        path: /etc/envoy/cds.yaml
+
+    admin:
+      address:
+        socket_address:
+          address: 127.0.0.1
+          port_value: 9901
+
+  lds.yaml: |-
+    version_info: "0"
+    resources:
+    - "@type": type.googleapis.com/envoy.config.listener.v3.Listener
+      name: listener_0
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 10000
+      filter_chains:
+      - filters:
+        - name: envoy.filters.network.http_connection_manager
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+            stat_prefix: hello_service
+            http_filters:
+            - name: envoy.filters.http.router
+            rds:
+              route_config_name: route_config_1
+              config_source:
+                path: /etc/envoy/rds.yaml
+
+  rds.yaml: |-
+    version_info: "0"
+    resources:
+    - "@type": type.googleapis.com/envoy.config.route.v3.RouteConfiguration
+      name: route_config_1
+      virtual_hosts:
+      - name: vhost
+        domains: ["*"]
+        routes:
+        - match:
+            path: "/v2/play/predict"
+            headers:
+            - name: "server_name"
+              string_match:
+                exact: "a"
+          route:
+            prefix_rewrite: "/predict"
+            cluster: server_a
+
+        - match:
+            path: "/v2/play/predict"
+            headers:
+            - name: "server_name"
+              string_match:
+                exact: "b"
+          route:
+            prefix_rewrite: "/predict"
+            cluster: server_b
+
+  cds.yaml: |-
+    version_info: "0"
+    resources:
+    - "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+      name: server_a
+      connect_timeout: 5s
+      type: STRICT_DNS
+      load_assignment:
+        cluster_name: server_a
+        endpoints:
+        - lb_endpoints:
+          - endpoint:
+              address:
+                socket_address:
+                  address: deployment-a.sandbox
+                  port_value: 6000
+
+    - "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+      name: server_b
+      connect_timeout: 5s
+      type: STRICT_DNS
+      load_assignment:
+        cluster_name: server_b
+        endpoints:
+        - lb_endpoints:
+          - endpoint:
+              address:
+                socket_address:
+                  address: deployment-b.sandbox
+                  port_value: 6000

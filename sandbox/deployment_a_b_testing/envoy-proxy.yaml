@@ -1,0 +1,80 @@
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: configmaps-list
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "watch", "list"]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: configmaps-list
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: sandbox
+roleRef:
+  kind: ClusterRole
+  name: configmaps-list
+  apiGroup: rbac.authorization.k8s.io
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: envoy-proxy-a-b-testing
+  namespace: sandbox
+spec:
+  selector:
+    app: envoy-proxy-a-b-testing
+  ports:
+    - name: proxy
+      protocol: "TCP"
+      port: 10000
+      targetPort: 10000
+    - name: envoy-admin
+      protocol: "TCP"
+      port: 9901
+      targetPort: 9901
+  type: LoadBalancer
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: envoy-proxy-a-b-testing
+  namespace: sandbox
+spec:
+  selector:
+    matchLabels:
+      app: envoy-proxy-a-b-testing
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: envoy-proxy-a-b-testing
+    spec:
+      containers:
+      - name: envoy
+        image: galrabin/envoy-a-b-testing:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 10000
+        - containerPort: 9901
+        volumeMounts:
+        - name: envoy-config
+          mountPath: /etc/envoy/
+        env:
+        - name: IN_CLUSTER
+          value: "true"
+      volumes:
+      - name: envoy-config
+        configMap:
+          name: envoy-config

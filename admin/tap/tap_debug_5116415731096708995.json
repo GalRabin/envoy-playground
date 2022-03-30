@@ -1,0 +1,74 @@
+{
+ "http_buffered_trace": {
+  "request": {
+   "headers": [
+    {
+     "key": ":authority",
+     "value": "localhost:10001"
+    },
+    {
+     "key": ":path",
+     "value": "/error"
+    },
+    {
+     "key": ":method",
+     "value": "GET"
+    },
+    {
+     "key": ":scheme",
+     "value": "http"
+    },
+    {
+     "key": "user-agent",
+     "value": "curl/7.79.1"
+    },
+    {
+     "key": "accept",
+     "value": "*/*"
+    },
+    {
+     "key": "debug",
+     "value": "true"
+    },
+    {
+     "key": "x-forwarded-proto",
+     "value": "http"
+    },
+    {
+     "key": "x-request-id",
+     "value": "656888d2-9403-440b-a08b-21d7fd7d8b65"
+    }
+   ],
+   "trailers": []
+  },
+  "response": {
+   "headers": [
+    {
+     "key": ":status",
+     "value": "500"
+    },
+    {
+     "key": "content-length",
+     "value": "5"
+    },
+    {
+     "key": "content-type",
+     "value": "text/plain"
+    },
+    {
+     "key": "date",
+     "value": "Wed, 23 Mar 2022 08:10:35 GMT"
+    },
+    {
+     "key": "server",
+     "value": "envoy"
+    }
+   ],
+   "body": {
+    "truncated": false,
+    "as_string": "error"
+   },
+   "trailers": []
+  }
+ }
+}
